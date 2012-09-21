@@ -58,7 +58,7 @@ var parseData = function parseData(points) {
       speed: point.gpsSpeed,
       type: point.sysMsgType
     }
-    redisClient.lpush(streetName + ':' + point.sysServiceId, cEvent);
+    redisClient.lpush(streetName + ':' + point.sysServiceId, JSON.stringify(cEvent));
 
     streetSplit = re2.exec(streetName);
 
@@ -75,6 +75,7 @@ var parseData = function parseData(points) {
     var score = getScore(events[st]);
     console.log(st + " SCORE " + score);
   }
+  redisClient.quit();
 }
 
 var getScore = function(events) {
