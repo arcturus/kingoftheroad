@@ -1,8 +1,10 @@
 var request = require('request');
+var redis = require('redis'),
+    redisClient = redis.createClient();
 
 var END_POINT = 'https://drivetoimprove.co.uk/api/m/TelemetryInfoByType/%SERVICE_ID%?from=%START%&to=%END%&type=1,3,4,25,13,51,52,94';
-
-var getData = function getData(user, pass, service, 
+var events = {};
+var getData = function getData(user, pass, service,
     start, end, onSuccess, onError) {
 
   var end_point = END_POINT.replace('%SERVICE_ID%', service).
@@ -33,8 +35,8 @@ var getData = function getData(user, pass, service,
 
 var parseData = function parseData(points) {
   var re1 = new RegExp("(\\d+) (.+)", "ig");
-  var re2 = new RegExp("(.+) \\[(.+)\\]", "ig");    
-  points.GetTelemetryInfoByTypeResult.forEach(function(point) {    
+  var re2 = new RegExp("(.+) \\[(.+)\\]", "ig");
+  points.GetTelemetryInfoByTypeResult.forEach(function(point) {
 
     var streetName = point.geoStreet;
 
@@ -48,6 +50,14 @@ var parseData = function parseData(points) {
     }
 
     console.log(streetName);
+    var cEvent = {
+      town: point.geoTown,
+      country: point.geoCountry,
+      postCode: point.geoPostcode,
+      speed: point.gpsSpeed,
+      type: point.sysMsgType
+    }
+    redisClient.lpush(streetName + ':' + point.sysServiceId, cEvent);
 
     streetSplit = re2.exec(streetName);
 
@@ -56,7 +66,19 @@ var parseData = function parseData(points) {
       var bigRoad = streetSplit[2];
       console.log(bigRoad + " from previous");
     }
+    events[streetName] = events[streetName] || [];
+    events[streetName] = cEvent;
   });
+
+  for (var st in events) {
+    var score = getScore(events[st]);
+    console.log(st + " SCORE " + score);
+  }
+}
+
+var getScore = function(events) {
+  //TODO
+  return 0;
 }
 
 if (!process.argv || process.argv.length !=7) {

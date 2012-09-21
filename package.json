@@ -2,6 +2,7 @@
  "name":"KingOfTheRoad",
   "version":"0.0.1",
   "dependencies": {
-    "request": ">=2.11.0"
+    "request": ">=2.11.0",
+    "redis": ">=0.8.1"
   }
 }
