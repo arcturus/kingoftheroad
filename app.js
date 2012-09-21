@@ -65,7 +65,9 @@ var parseData = function parseData(points) {
     if (streetSplit != null) {
       //Double road
       var bigRoad = streetSplit[1];
-      console.log(bigRoad + " from previous");
+      console.log(bigRoad);
+      events[bigRoad] = events[bigRoad] || [];
+      events[bigRoad] = cEvent;
     }
     events[streetName] = events[streetName] || [];
     events[streetName] = cEvent;
