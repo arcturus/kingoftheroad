@@ -37,8 +37,8 @@ var getData = function getData(user, pass, service,
 
 var parseData = function parseData(service, points) {
   var re1 = new RegExp("[0-9]+\b(.+)", "ig");
-  var re2 = new RegExp(".+ \\[(.+)\\]", "ig");    
-  points.GetTelemetryInfoByTypeResult.forEach(function(point) {    
+  var re2 = new RegExp(".+ \\[(.+)\\]", "ig");
+  points.GetTelemetryInfoByTypeResult.forEach(function(point) {
 
     var streetName = point.geoStreet;
 
@@ -76,12 +76,22 @@ var parseData = function parseData(service, points) {
   });
 
   for (var st in events) {
-    getScore(service, st, events[st], function(scoreObj) { 
+    getScore(service, st, events[st], function(scoreObj) {
       console.log('Score for street ' + scoreObj.street + ' : ' + scoreObj.score);
+      storeScore(scoreObj.street, service, scoreObj.score);
     });
   }
-  redisClient.quit();
 };
+
+var storeScore = function(streetName, userId, score) {
+  redisClient.zscore(streetName, userId, function(err, previous) {
+    redisClient.zincrby(streetName, score, userId, function(err, reply) {
+      redisClient.zscore(streetName, userId, function(err, current) {
+        console.log("FOR STREET " + streetName + " SCORE WAS " + previous + " AND NOW IS " + current + " (INC "+ score +")");
+      });
+    });
+  });
+}
 
 var getScore = function(service, street, events, callback) {
   var scoresByEvents = {
@@ -111,7 +121,7 @@ var getScore = function(service, street, events, callback) {
         street: street,
         score: score
       });
-  }); 
+  });
 };
 
 var _key = function (service, street) {
