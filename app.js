@@ -34,19 +34,20 @@ var getData = function getData(user, pass, service,
 };
 
 var parseData = function parseData(points) {
-  var re1 = new RegExp("(\\d+) (.+)", "ig");
-  var re2 = new RegExp("(.+) \\[(.+)\\]", "ig");
-  points.GetTelemetryInfoByTypeResult.forEach(function(point) {
+  var re1 = new RegExp("[0-9]+\b(.+)", "ig");
+  var re2 = new RegExp(".+ \\[(.+)\\]", "ig");    
+  points.GetTelemetryInfoByTypeResult.forEach(function(point) {    
 
     var streetName = point.geoStreet;
 
     if (streetName.length == 0) {
       return;
     }
+    //console.log(streetName);
     var streetSplit = re1.exec(streetName);
 
     if (streetSplit != null) {
-      streetName = streetSplit[2];
+      streetName = streetSplit[1];
     }
 
     console.log(streetName);
@@ -63,7 +64,7 @@ var parseData = function parseData(points) {
 
     if (streetSplit != null) {
       //Double road
-      var bigRoad = streetSplit[2];
+      var bigRoad = streetSplit[1];
       console.log(bigRoad + " from previous");
     }
     events[streetName] = events[streetName] || [];
