@@ -37,6 +37,10 @@ var parseData = function parseData(points) {
   points.GetTelemetryInfoByTypeResult.forEach(function(point) {    
 
     var streetName = point.geoStreet;
+
+    if (streetName.length == 0) {
+      return;
+    }
     var streetSplit = re1.exec(streetName);
 
     if (streetSplit != null) {
@@ -55,6 +59,10 @@ var parseData = function parseData(points) {
   });
 }
 
-getData(USER, PASSWORD, SERVICE, '2012-09-10', '2012-09-11', parseData, function(e) {
-  console.error(e);
-});
+if (!process.argv || process.argv.length !=7) {
+  console.log('Execute node app.js <user> <pass> <service> <start> <end>');
+} else {
+  getData(process.argv[2], process.argv[3], process.argv[4], process.argv[5], process.argv[6], parseData, function(e) {
+    console.error(e);
+  });
+}
